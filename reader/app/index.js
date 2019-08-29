@@ -1,5 +1,10 @@
 // Imports the Google Cloud client library
 const {PubSub} = require('@google-cloud/pubsub');
+const {Logging} = require('@google-cloud/logging');
+// Creates a client
+const logging = new Logging({projectId: 'google.com:cloud-storage-adventure'});
+// Selects the log to write to
+const logger = logging.log('grpc-stress');
 
 // Creates a client
 const pubsub = new PubSub();
@@ -22,12 +27,7 @@ const subscription = pubsub.subscription(subscriptionName, {
 // Create an event handler to handle messages
 let messageCount = 0;
 const messageHandler = message => {
-  console.log(`Received message ${message.id}:`);
-  console.log(`\tData Size: ${message.data.length}`);
-  console.log(`\tData: ${message.data.slice(0, 128)}`);
-  console.log(`\tAttribute Count: ${JSON.stringify(message.attributes, null, 2)}`);
   console.log(`${messageCount} messages processed`);
-  console.log('-------------------');
   messageCount += 1;
 
   // "Ack" (acknowledge receipt of) the message
@@ -43,15 +43,29 @@ const messageHandler = message => {
   }
 };
 
+log('reader started');
+
+async function log (message) {
+  const metadata = {
+    resource: {type: 'global'},
+  }
+  const entry = logger.entry(metadata, message);
+
+  // Writes the log entry
+  await logger.write(entry);
+}
+
 // Listen for new messages until timeout is hit
 subscription.on(`message`, messageHandler);
 
-process.on('unhandledRejection', error => {
-  console.info(error.stack);
-  process.exit(1);
+process.on('unhandledRejection', async (error) => {
+  console.error(error.stack)
+  await log(JSON.stringify(error.stack))
+  process.exit(1)
 });
 
-process.on('uncaughtException', (error) => {
-  console.info(error.stack);
-  process.exit(1);
+process.on('uncaughtException', async (error) => {
+  console.error(error.stack)
+  await log(JSON.stringify(error.stack))
+  process.exit(1)
 });
