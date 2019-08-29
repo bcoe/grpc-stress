@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: reader
+spec:
+  selector:
+    matchLabels:
+      app: pubsub
+  template:
+    metadata:
+      labels:
+        app: pubsub
+    spec:
+      volumes:
+      - name: google-cloud-key
+        secret:
+          secretName: pubsub-key
+      containers:
+      - name: subscriber
+        image: gcr.io/long-door-651/reader:v1.0.0
+        volumeMounts:
+        - name: google-cloud-key
+          mountPath: /secrets
+        env:
+        - name: GOOGLE_APPLICATION_CREDENTIALS
+          value: /secrets/qa.json
