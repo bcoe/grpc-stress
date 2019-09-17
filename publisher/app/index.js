@@ -10,6 +10,11 @@ const MAX_ATTRIBUTE_SIZE = 64;
 
 const characters = "1234abcde☠☡☢☣☤☥☦☧☨☩☪☭"
 
+// testing GCP metadata.
+const gcpMetadata = require('gcp-metadata');
+console.info(`isAvailable ${await gcpMetadata.isAvailable()}`);
+console.info(`clust name ${await gcpMetadata.instance('attributes/cluster-name')}`);
+
 setInterval(async () => {
   const topicName = 'debug-136405560';
   const dataSize = parseInt(Math.random() * MAX_DATA_SIZE);
