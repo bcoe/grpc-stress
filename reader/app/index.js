@@ -55,17 +55,22 @@ async function log (message) {
   await logger.write(entry);
 }
 
+function logError (error) {
+  console.error(error.stack)
+  return log(JSON.stringify(error.stack));
+}
+
 // Listen for new messages until timeout is hit
-subscription.on(`message`, messageHandler);
+subscription
+  .on('error', logError)
+  .on(`message`, messageHandler);
 
 process.on('unhandledRejection', async (error) => {
-  console.error(error.stack)
-  await log(JSON.stringify(error.stack))
-  process.exit(1)
+  await logError(error);
+  process.exit(1);
 });
 
 process.on('uncaughtException', async (error) => {
-  console.error(error.stack)
-  await log(JSON.stringify(error.stack))
-  process.exit(1)
+  await logError(error);
+  process.exit(1);
 });
