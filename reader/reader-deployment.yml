@@ -17,7 +17,7 @@ spec:
           secretName: pubsub-key
       containers:
       - name: subscriber
-        image: gcr.io/long-door-651/reader:v1.0.6
+        image: gcr.io/long-door-651/reader:v2.0.0
         volumeMounts:
         - name: google-cloud-key
           mountPath: /secrets
