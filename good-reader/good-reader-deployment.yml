@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: reader
+  name: good-reader
 spec:
   selector:
     matchLabels:
@@ -17,7 +17,7 @@ spec:
           secretName: pubsub-key
       containers:
       - name: subscriber
-        image: gcr.io/long-door-651/reader:v2.2.0
+        image: gcr.io/long-door-651/good-reader:v1.1.15
         volumeMounts:
         - name: google-cloud-key
           mountPath: /secrets

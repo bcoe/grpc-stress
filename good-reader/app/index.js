@@ -16,34 +16,39 @@ const pubsub = new PubSub();
  * TODO(developer): Uncomment the following lines to run the sample.
  */
 const subscriptionName = 'debug-136405560';
-// const timeout = 60;
+const timeout = 60;
 
 // References an existing subscription
 const subscription = pubsub.subscription(subscriptionName, {
   flowControl: {
     allowExcessMessages: true,
     maxExtension: 1,
-    maxMessages: 5
+    maxMessages: 1
   },
+   streamingOptions: {
+      timeout: 5000
+  }
 });
+
+function simulateBlockedMainThread () {
+  console.info('simulating CPU bound operation');
+  const start = Date.now();
+  while ((Date.now() - start) < 10000) {};
+}
+setInterval(() => {
+//  simulateBlockedMainThread();
+}, 50000);
 
 // Create an event handler to handle messages
 let messageCount = 0;
 const messageHandler = message => {
   console.log(`${messageCount} messages processed`);
   messageCount += 1;
-
-  // "Ack" (acknowledge receipt of) the message
-  const val = Math.random() < 0.5
-  if (val < 0.5) {
-    console.info(`ignoring ${message.id}`);
-  } else if (val < 0.75) {
-    console.info(`ack ${message.id}`);
-    message.ack();
-  } else {
-    console.info(`nack ${message.id}`);
-    message.nack();
-  }
+  const data = Buffer.from(message.data, 'base64').toString('utf8');
+  console.log(data.substring(0, 10));
+  const start = Date.now()
+  while ((Date.now() - start) < 1000) {};
+  message.ack();
 };
 
 log('reader started');
